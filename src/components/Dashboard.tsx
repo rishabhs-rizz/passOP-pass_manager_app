@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { CopyIcon } from "./icons";
+import { CopyIcon, DeleteIcon, EditIcon } from "./icons";
 import { Bounce, ToastContainer, toast } from "react-toastify";
+import { v4 as uuidv4 } from 'uuid';
 
 function Dashboard() {
   type DataEntry = {
+    id: string;
     site: string;
     username: string;
     password: string;
   };
   const [Data, SetData] = useState<DataEntry>({
+    id: "",
     site: "",
     username: "",
     password: "",
@@ -23,10 +26,26 @@ function Dashboard() {
   }, []);
 
   const savePassword = () => {
-    SetDataArray([...DataArray, Data]);
-    localStorage.setItem("Data", JSON.stringify([...DataArray, Data]));
-    console.log([...DataArray, Data]);
+    SetDataArray([...DataArray, {...Data, id: uuidv4()}]);
+    localStorage.setItem("Data", JSON.stringify([...DataArray, {...Data, id: uuidv4()}]));
+    console.log([...DataArray, {...Data, id: uuidv4()}]);
   };
+
+  const DelPassword = (id:string) => {
+
+    let confirm = window.confirm("Do You Really Want To Delete This Entry ?")
+    if(confirm) {
+      SetDataArray(DataArray.filter((x)=> x.id !== id));
+      localStorage.setItem("Data", JSON.stringify(DataArray.filter((x)=> x.id !== id)));
+      console.log([...DataArray, Data]);
+    }
+    
+  };
+
+  const editPassword = (id: string)=> {
+    SetData(DataArray.filter((x)=> x.id === id)[0])
+    SetDataArray(DataArray.filter((x)=> x.id !== id))
+  }
 
   //@ts-ignore
   const handleChange = (e) => {
@@ -177,7 +196,10 @@ function Dashboard() {
                         </div>
                       </td>
                       <td className=" p-2 text-center w-32 border-white border">
-                        DELETE
+                      <div className="flex justify-center items-center gap-2">
+                          <span className="cursor-pointer" onClick={()=>(editPassword(item.id))} > <EditIcon/> </span>
+                          <span className="cursor-pointer" onClick={()=> (DelPassword(item.id))}> <DeleteIcon/> </span>{" "}
+                        </div>
                       </td>
                     </tr>
                   );
